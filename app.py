@@ -7,6 +7,7 @@ from routes.mypage.bookmark import bookmark_bp
 from routes.mypage.notice import notice_bp
 from routes.mypage.event import event_bp
 from routes.mypage.faq import faq_bp
+from routes.mypage.inquiry import inquiry_bp
 
 
 app = Flask(__name__)
@@ -18,6 +19,7 @@ app.register_blueprint(bookmark_bp)
 app.register_blueprint(notice_bp)
 app.register_blueprint(event_bp)
 app.register_blueprint(faq_bp)
+app.register_blueprint(inquiry_bp)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
