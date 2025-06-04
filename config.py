@@ -4,12 +4,14 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-mongo_uri = os.getenv("MONGO_URI")
-mongo_db_name = os.getenv("MONGO_DB")
+class Config:
+    MONGO_URI = os.getenv("MONGO_URI")
+    MONGO_DB = os.getenv("MONGO_DB")
 
-client = MongoClient(mongo_uri)
-db = client[mongo_db_name]
+# MongoDB 연결
+client = MongoClient(Config.MONGO_URI)
+db = client[Config.MONGO_DB]
 
+# 컬렉션
 users = db["users"]
 health_profiles = db["health_profiles"]
-print("✅ MONGO_URI:", mongo_uri)
