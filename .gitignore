@@ -1,0 +1,15 @@
+# Python 가상환경
+.venv/
+
+# __pycache__ 디렉토리 (파이썬 캐시파일)
+__pycache__/
+
+# VSCode 설정 파일 (개인 설정이므로 공유 불필요)
+.vscode/
+
+# macOS나 Windows에서 생기는 쓸모없는 시스템 파일
+.DS_Store
+Thumbs.db
+
+# 환경 변수 설정파일 (보안정보 포함 가능)
+.env
