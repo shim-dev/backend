@@ -2,12 +2,16 @@ from flask import Blueprint, request, jsonify
 import numpy as np
 import cv2
 from ultralytics import YOLO
+import os
 
 yolo_bp = Blueprint('yolo', __name__)
 
+# 상대 경로로 모델 로드
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(BASE_DIR, '..', '..', 'weights', 'best.pt')
+model = YOLO(MODEL_PATH)
 
-# 음식 인식 코드
-model = YOLO("C:\\Users\\Admin\\Desktop\\train12\\weights\\best.pt")  # 커스텀 음식 모델이 있다면 여기서 교체
+
 @yolo_bp.route('/detect', methods=['POST'])
 def detect_food():
     file = request.files['image']
