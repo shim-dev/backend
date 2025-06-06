@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from bson import ObjectId
 from bson.errors import InvalidId
-
+from datetime import datetime
 
 from config import db
 
@@ -64,3 +64,48 @@ def increase_recipe_view():
         return jsonify({'status': 'success'}), 200
     else:
         return jsonify({'error': '레시피 찾지 못함'}), 404
+    
+# 최근에 본 레시피 id 저장
+@recipe_bp.route('/add_recent', methods=['POST'])
+def add_recent():
+    data = request.json
+
+    # 1️⃣ 기존 중복 항목 제거
+    db.recent_recipes.delete_many({
+        "user_id": ObjectId(data["user_id"]),
+        "recipe_id": ObjectId(data["recipe_id"])
+    })
+
+    db.recent_recipes.insert_one({
+        "user_id": ObjectId(data["user_id"]),
+        "recipe_id": ObjectId(data["recipe_id"]),
+        "timestamp": datetime.utcnow()  # 최신순 정렬용
+    })
+    return jsonify(success=True)
+
+# 최근에 본 레시피 불러오기
+@recipe_bp.route('/get_recent')
+def get_recent():
+    user_id = request.args.get("user_id")
+    recent_docs = db.recent_recipes.find(
+        {"user_id": ObjectId(user_id)}
+    ).sort("timestamp", -1).limit(10)
+
+    recipe_ids = [doc["recipe_id"] for doc in recent_docs]
+    recipes = list(db.recipes.find({"_id": {"$in": recipe_ids}}))
+
+    for r in recipes:
+        r["_id"] = str(r["_id"])
+    return jsonify(recipes)
+
+# 최근에 본 레시피 삭제하기
+@recipe_bp.route('/delete_recent', methods=['DELETE'])
+def delete_recent():
+    user_id = request.args.get('user_id')
+    recipe_id = request.args.get('recipe_id')
+    db.recent_recipes.delete_one({
+        "user_id": ObjectId(user_id),
+        "recipe_id": ObjectId(recipe_id)
+    })
+    return jsonify(success=True)
+
