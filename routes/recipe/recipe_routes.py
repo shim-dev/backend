@@ -109,3 +109,26 @@ def delete_recent():
     })
     return jsonify(success=True)
 
+
+# 북마크 추가하기
+@recipe_bp.route('/bookmark_recipe', methods=['POST'])
+def bookmark_recipe():
+    data = request.json
+    user_id = data.get('user_id')
+    recipe_id = data.get('recipe_id')
+    if not user_id or not recipe_id:
+        return jsonify({'error': 'user_id와 recipe_id가 필요합니다.'}), 400
+
+    # 이미 북마크했는지 체크(중복 방지)
+    exists = db.bookmarks.find_one({
+        'user_id': user_id,
+        'recipe_id': recipe_id,
+    })
+    if exists:
+        return jsonify({'status': 'already bookmarked'}), 200
+
+    db.bookmarks.insert_one({
+        'user_id': user_id,
+        'recipe_id': recipe_id,
+    })
+    return jsonify({'status': 'bookmarked'})
