@@ -3,6 +3,7 @@ from config import db
 from bson import ObjectId
 from bson.errors import InvalidId
 from config import users
+from werkzeug.security import check_password_hash, generate_password_hash
 
 mypage_bp = Blueprint("mypage", __name__, url_prefix="/api/mypage")
 
@@ -48,3 +49,23 @@ def update_nickname():
         return jsonify({'message': '닉네임 변경 성공'}), 200
     else:
         return jsonify({'message': '변경된 내용 없음 또는 유저 없음'}), 400
+
+@mypage_bp.route('/change_password', methods=['POST'])
+def change_password():
+    data = request.get_json()
+    user_id = data.get('user_id')
+    current_pw = data.get('current_password')
+    new_pw = data.get('new_password')
+
+    user = users.find_one({'_id': ObjectId(user_id)})
+
+    if not user:
+        return jsonify({'error': '사용자 없음'}), 404
+
+    if not check_password_hash(user['password'], current_pw):
+        return jsonify({'error': '현재 비밀번호가 틀립니다.'}), 400  
+
+    # 비밀번호 업데이트
+    new_hash = generate_password_hash(new_pw)
+    users.update_one({'_id': ObjectId(user_id)}, {'$set': {'password': new_hash}})
+    return jsonify({'message': '비밀번호 변경 성공'}), 200
