@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from config import db
 from bson import ObjectId
 from bson.errors import InvalidId
+from config import users
 
 mypage_bp = Blueprint("mypage", __name__, url_prefix="/api/mypage")
 
@@ -32,4 +33,18 @@ def get_user():
         print("[ERROR] 서버 오류:", e)
         return jsonify({ "message": "서버 오류가 발생했습니다." }), 500
 
+@mypage_bp.route('/nickname', methods=['POST'])
+def update_nickname():
+    data = request.get_json()
+    user_id = data.get('user_id')
+    nickname = data.get('nickname')
 
+    if not user_id or not nickname:
+        return jsonify({'error': '입력 오류'}), 400
+
+    result = users.update_one({'_id': ObjectId(user_id)}, {'$set': {'nickname': nickname}})
+
+    if result.modified_count == 1:
+        return jsonify({'message': '닉네임 변경 성공'}), 200
+    else:
+        return jsonify({'message': '변경된 내용 없음 또는 유저 없음'}), 400
