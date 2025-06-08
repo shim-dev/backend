@@ -69,3 +69,22 @@ def change_password():
     new_hash = generate_password_hash(new_pw)
     users.update_one({'_id': ObjectId(user_id)}, {'$set': {'password': new_hash}})
     return jsonify({'message': '비밀번호 변경 성공'}), 200
+
+@mypage_bp.route('/health_profile', methods=['GET'])
+def get_health_profile():
+    user_id = request.args.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'user_id 필요'}), 400
+
+    profile = db.health_profiles.find_one({'user_id': user_id})
+    if not profile:
+        return jsonify({'error': '프로필 없음'}), 404
+
+    return jsonify({
+        'height': profile.get('height'),
+        'weight': profile.get('weight'),
+        'activity_level': profile.get('activity_level'),
+        'sleep_hour': profile.get('sleep_hour'),
+        'caffeine_cup': profile.get('caffeine_cup'),
+        'alcohol_cup': profile.get('alcohol_cup'),
+    }), 200
