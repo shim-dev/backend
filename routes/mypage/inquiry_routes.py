@@ -1,6 +1,8 @@
 from flask import Blueprint, request, jsonify
 from config import db
 from bson import ObjectId
+from datetime import datetime
+from config import inquiry_col
 
 inquiry_bp = Blueprint("inquiry", __name__, url_prefix="/api/mypage")
 
@@ -31,6 +33,23 @@ def get_inquiry_list():
         print("❌ 1:1 문의 목록 조회 실패:", e)
         return jsonify({'message': '서버 오류'}), 500
 
+@inquiry_bp.route('/inquiries', methods=['POST'])
+def post_inquiry():
+    data = request.get_json()
+
+    inquiry_doc = {
+        "user_id": data.get("user_id"),
+        "title": data.get("title"),
+        "content": data.get("content"),
+        "status": "접수 중",
+        "created_at": datetime.utcnow(),
+        "images": [],
+        "answer": "",
+        "answered_at": None,
+    }
+
+    result = inquiry_col.insert_one(inquiry_doc) 
+    return jsonify({"success": True, "inquiry_id": str(result.inserted_id)}), 200
 
 
 
