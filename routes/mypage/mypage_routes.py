@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+from datetime import datetime
 from config import db
 from bson import ObjectId
 from bson.errors import InvalidId
@@ -88,3 +89,38 @@ def get_health_profile():
         'caffeine_cup': profile.get('caffeine_cup'),
         'alcohol_cup': profile.get('alcohol_cup'),
     }), 200
+
+@mypage_bp.route('/withdrawal', methods=['POST'])
+def withdrawal():
+    data = request.get_json()
+    user_id = data.get('user_id')
+    reason = data.get('reason', '')
+
+    if not user_id:
+        return jsonify({'error': 'user_id is required'}), 400
+
+    try:
+        object_id = ObjectId(user_id)  
+
+        # 1. 탈퇴 사유 저장
+        db.quit_reasons.insert_one({
+            'user_id': object_id,
+            'reason': reason,
+            'timestamp': datetime.utcnow()
+        })
+
+        # 2. 관련 데이터 완전 삭제
+        db.users.delete_one({'_id': object_id})
+        db.health_profiles.delete_many({'user_id': object_id})
+        db.bookmarks.delete_many({'user_id': object_id})
+        db.records.delete_many({'user_id': object_id})
+        db.sleep_hours.delete_many({'user_id': object_id})
+        db.water_records.delete_many({'user_id': object_id})
+        db.inquiries.delete_many({'user_id': object_id})
+        db.images_col.delete_many({'user_id': object_id})  # 프로필 사진 등
+
+        return jsonify({'message': '회원 탈퇴 완료'}), 200
+
+    except Exception as e:
+        print(f"❌ 회원 탈퇴 중 오류: {e}")
+        return jsonify({'error': '서버 오류'}), 500
