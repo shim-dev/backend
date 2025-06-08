@@ -24,8 +24,7 @@ def get_user():
         return jsonify({
             'email': user.get('email'),
             'nickname': user.get('nickname'),
-            'profileImageUrl': user.get('profileImageUrl'),
-            'notificationEnabled': user.get('notificationEnabled')
+            'profileImageUrl': user.get('profile_url'),
         }), 200
 
     except InvalidId:
