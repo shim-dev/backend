@@ -9,7 +9,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 mypage_bp = Blueprint("mypage", __name__, url_prefix="/api/mypage")
 
 @mypage_bp.route('/user', methods=['GET'])  
-def get_user():
+def get_user_info():
     user_id = request.args.get('user_id')
     if not user_id:
         return jsonify({ "message": "user_id 파라미터가 필요합니다." }), 400
@@ -24,7 +24,7 @@ def get_user():
         return jsonify({
             'email': user.get('email'),
             'nickname': user.get('nickname'),
-            'profileImageUrl': user.get('profile_url'),
+            'profile_url': user.get('profile_url'),
         }), 200
 
     except InvalidId:
