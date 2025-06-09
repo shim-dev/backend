@@ -130,3 +130,27 @@ def get_sleep():
         return jsonify({'error': 'user_id 누락!'}), 400
     result = sleep_hours.find_one({'user_id': user_id, 'date': date}, {'_id': 0})
     return jsonify(result if result else {'hours': 0})
+
+# 모든 수분 섭취량 받아오기
+@record_bp.route('/get_all_water_records')
+def get_all_water_records():
+    user_id = request.args.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'user_id 누락!'}), 400
+
+    records_list = list(water_records.find({'user_id': user_id}))
+    for r in records_list:
+        r['_id'] = str(r['_id'])
+    return jsonify(records_list)
+
+# 모든 수면량 받아오기
+@record_bp.route('/get_all_sleep_records')
+def get_all_sleep_records():
+    user_id = request.args.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'user_id 누락!'}), 400
+
+    records_list = list(sleep_hours.find({'user_id': user_id}))
+    for r in records_list:
+        r['_id'] = str(r['_id'])
+    return jsonify(records_list)
